@@ -43,6 +43,7 @@ public class ProductServicesImpl implements ProductServices{
 		return dtoList;
 	}
 
+	//Method to add a product in the database
 	@Override
 	public ProductDto addAProduct(ProductDto dto) {
 		Products product = this.convertToProducts(dto);
@@ -53,6 +54,16 @@ public class ProductServicesImpl implements ProductServices{
 		return dto;
 	}
 	
+	//Method to fetch a product from database using product id
+	@Override
+	public ProductDto getAProduct(Long productId) {
+		Products products = this.productDao.getReferenceById(productId);
+		ProductDto dto = this.convertToDto(products);
+		return dto;
+	}
+
+	
+	//Method to convert product-entity to product-dto
 	public ProductDto convertToDto(Products product) {
 		ProductDto dto = new ProductDto();
 		dto.setProductId(product.getProductId());
@@ -67,6 +78,8 @@ public class ProductServicesImpl implements ProductServices{
 		return dto;
 	}
 	
+	
+	//Method to convert product-dto to product-entity
 	public Products convertToProducts(ProductDto dto) {
 		Products product = new Products();
 		product.setProductName(dto.getProductName());
@@ -81,5 +94,4 @@ public class ProductServicesImpl implements ProductServices{
 		product.setTarget(target);
 		return product;
 	}
-
 }

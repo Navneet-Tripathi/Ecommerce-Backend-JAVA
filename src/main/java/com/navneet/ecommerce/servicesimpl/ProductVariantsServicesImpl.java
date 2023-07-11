@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.navneet.ecommerce.dto.ColorDto;
 import com.navneet.ecommerce.dto.ProductVariantDto;
 import com.navneet.ecommerce.entities.Color;
 import com.navneet.ecommerce.entities.ProductVariants;
@@ -18,6 +19,7 @@ import com.navneet.ecommerce.repository.ColorDao;
 import com.navneet.ecommerce.repository.ProductDao;
 import com.navneet.ecommerce.repository.ProductVariantsDao;
 import com.navneet.ecommerce.repository.SizeDao;
+import com.navneet.ecommerce.services.ColorServices;
 import com.navneet.ecommerce.services.ProductVariantsServices;
 
 @Service
@@ -34,6 +36,9 @@ public class ProductVariantsServicesImpl implements ProductVariantsServices{
 	@Autowired
 	private SizeDao sizeDao;
 	
+	@Autowired
+	private ColorServices colorServices;
+	
 	//Method to fetch all the product variants using pagination
 	@Override
 	public List<ProductVariantDto> getAllVariants(Integer pageNumber, Integer pageSize) {
@@ -48,6 +53,7 @@ public class ProductVariantsServicesImpl implements ProductVariantsServices{
 		return dtoList;
 	}
 
+	//Method to add a variant 
 	@Override
 	public ProductVariantDto addAVariant(ProductVariantDto dto) {
 		ProductVariants variants = this.convertToVariants(dto);
@@ -58,6 +64,18 @@ public class ProductVariantsServicesImpl implements ProductVariantsServices{
 		return dto;
 	}
 	
+	//Method to fetch available color options for a product
+	@Override
+	public List<ColorDto> getColorOptions(Long productId) {
+		Products product = productDao.getReferenceById(productId);
+		List<Color> colorList = variantsDao.findDistinctColors(product);
+		List<ColorDto> dtoList = new ArrayList<>();
+		for(Color c : colorList) {
+			ColorDto dto = this.colorServices.convertToDto(c);
+			dtoList.add(dto);
+		}
+		return dtoList;
+	}
 	
 	public ProductVariantDto convertToDto(ProductVariants variants) {
 		ProductVariantDto dto = new ProductVariantDto();
