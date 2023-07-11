@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.navneet.ecommerce.dto.ColorDto;
 import com.navneet.ecommerce.dto.ProductVariantDto;
+import com.navneet.ecommerce.dto.SizeDto;
 import com.navneet.ecommerce.services.ProductVariantsServices;
 
 @RestController
@@ -31,6 +32,12 @@ public class ProductVariantsController {
 	@GetMapping("/products/{productId}/colors")
 	public List<ColorDto> findAvailableColors(@PathVariable Long productId){
 		return this.variantsServices.getColorOptions(productId);
+	}
+	
+	//API to fetch all the available sizes corresponding to a particular color option in a product
+	@GetMapping("/products/{productId}/{colorId}/sizes")
+	public List<SizeDto> findAvailableSizes(@PathVariable Long productId, @PathVariable Integer colorId){
+		return this.variantsServices.getSizeOptions(productId, colorId);
 	}
 	
 	//API to add a variant in the database

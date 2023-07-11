@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.navneet.ecommerce.dto.ColorDto;
 import com.navneet.ecommerce.dto.ProductVariantDto;
+import com.navneet.ecommerce.dto.SizeDto;
 import com.navneet.ecommerce.entities.Color;
 import com.navneet.ecommerce.entities.ProductVariants;
 import com.navneet.ecommerce.entities.Products;
@@ -21,6 +22,7 @@ import com.navneet.ecommerce.repository.ProductVariantsDao;
 import com.navneet.ecommerce.repository.SizeDao;
 import com.navneet.ecommerce.services.ColorServices;
 import com.navneet.ecommerce.services.ProductVariantsServices;
+import com.navneet.ecommerce.services.SizeServices;
 
 @Service
 public class ProductVariantsServicesImpl implements ProductVariantsServices{
@@ -38,6 +40,9 @@ public class ProductVariantsServicesImpl implements ProductVariantsServices{
 	
 	@Autowired
 	private ColorServices colorServices;
+	
+	@Autowired
+	private SizeServices sizeServices;
 	
 	//Method to fetch all the product variants using pagination
 	@Override
@@ -67,12 +72,26 @@ public class ProductVariantsServicesImpl implements ProductVariantsServices{
 	//Method to fetch available color options for a product
 	@Override
 	public List<ColorDto> getColorOptions(Long productId) {
-		Products product = productDao.getReferenceById(productId);
+		Products product = this.productDao.getReferenceById(productId);
 		List<Color> colorList = variantsDao.findDistinctColors(product);
 		List<ColorDto> dtoList = new ArrayList<>();
 		for(Color c : colorList) {
 			ColorDto dto = this.colorServices.convertToDto(c);
 			dtoList.add(dto);
+		}
+		return dtoList;
+	}
+	
+	//Method to fetch available sizes corresponding to a color option of a product
+	@Override
+	public List<SizeDto> getSizeOptions(Long productId, Integer colorId) {
+		Products product = this.productDao.getReferenceById(productId);
+		Color color = this.colorDao.getReferenceById(colorId);
+		
+		List<Size> sizeList = this.variantsDao.findDistinctSizes(product, color);
+		List<SizeDto> dtoList = new ArrayList<>();
+		for(Size s: sizeList) {
+			dtoList.add(this.sizeServices.convertToDto(s));
 		}
 		return dtoList;
 	}
