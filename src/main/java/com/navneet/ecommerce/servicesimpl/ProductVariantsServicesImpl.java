@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.navneet.ecommerce.dto.ProductVariantDto;
@@ -31,9 +34,12 @@ public class ProductVariantsServicesImpl implements ProductVariantsServices{
 	@Autowired
 	private SizeDao sizeDao;
 	
+	//Method to fetch all the product variants using pagination
 	@Override
-	public List<ProductVariantDto> getAllVariants() {
-		List<ProductVariants> variantList = this.variantsDao.findAll();
+	public List<ProductVariantDto> getAllVariants(Integer pageNumber, Integer pageSize) {
+		Pageable page = PageRequest.of(pageNumber, pageSize);
+		Page<ProductVariants> pageList = this.variantsDao.findAll(page);
+		List<ProductVariants> variantList = pageList.getContent();
 		List<ProductVariantDto> dtoList = new ArrayList<>();
 		
 		for(ProductVariants v: variantList) {

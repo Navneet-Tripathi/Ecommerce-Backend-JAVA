@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.navneet.ecommerce.dto.ProductDto;
@@ -26,9 +29,12 @@ public class ProductServicesImpl implements ProductServices{
 	@Autowired
 	private TargetDao targetDao;
 	
+	//Method to fetch all products in the database using pagination concept
 	@Override
-	public List<ProductDto> getAllProducts() {
-		List<Products> productList = this.productDao.findAll();
+	public List<ProductDto> getAllProducts(Integer pageNumber, Integer pageSize) {
+		Pageable page = PageRequest.of(pageNumber, pageSize);
+		Page<Products> pageList = this.productDao.findAll(page);
+		List<Products> productList = pageList.getContent();
 		List<ProductDto> dtoList = new ArrayList<>();
 		
 		for(Products p: productList) {
