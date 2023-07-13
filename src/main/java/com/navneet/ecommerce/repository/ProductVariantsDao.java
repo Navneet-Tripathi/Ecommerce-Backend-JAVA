@@ -14,6 +14,6 @@ public interface ProductVariantsDao extends JpaRepository<ProductVariants, Long>
 	@Query("SELECT DISTINCT pv.color FROM ProductVariants pv WHERE pv.products = ?1")
     public List<Color> findDistinctColors(Products products);
 	
-	@Query("SELECT DISTINCT pv.size FROM ProductVariants pv WHERE pv.products = ?1 AND pv.color = ?2")
+	@Query("SELECT DISTINCT pv.size FROM ProductVariants pv WHERE pv.products = ?1 AND pv.color = ?2 AND pv.productQuantity>0")
 	public List<Size> findDistinctSizes(Products products, Color color);
 }

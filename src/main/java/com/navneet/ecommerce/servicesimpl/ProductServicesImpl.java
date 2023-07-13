@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.navneet.ecommerce.annotations.TrackResponceTime;
 import com.navneet.ecommerce.dto.ProductDto;
 import com.navneet.ecommerce.entities.Category;
 import com.navneet.ecommerce.entities.Products;
@@ -19,6 +20,7 @@ import com.navneet.ecommerce.repository.TargetDao;
 import com.navneet.ecommerce.services.ProductServices;
 
 @Service
+@TrackResponceTime
 public class ProductServicesImpl implements ProductServices{
 	@Autowired
 	private ProductDao productDao;

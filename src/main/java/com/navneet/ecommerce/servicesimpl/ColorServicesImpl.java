@@ -7,12 +7,14 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.navneet.ecommerce.annotations.TrackResponceTime;
 import com.navneet.ecommerce.dto.ColorDto;
 import com.navneet.ecommerce.entities.Color;
 import com.navneet.ecommerce.repository.ColorDao;
 import com.navneet.ecommerce.services.ColorServices;
 
 @Service
+@TrackResponceTime
 public class ColorServicesImpl implements ColorServices{
 	@Autowired
 	private ModelMapper mapper;

@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.navneet.ecommerce.annotations.TrackResponceTime;
 import com.navneet.ecommerce.dto.ColorDto;
 import com.navneet.ecommerce.dto.ProductVariantDto;
 import com.navneet.ecommerce.dto.SizeDto;
@@ -25,6 +26,7 @@ import com.navneet.ecommerce.services.ProductVariantsServices;
 import com.navneet.ecommerce.services.SizeServices;
 
 @Service
+@TrackResponceTime
 public class ProductVariantsServicesImpl implements ProductVariantsServices{
 	@Autowired
 	private ProductVariantsDao variantsDao;

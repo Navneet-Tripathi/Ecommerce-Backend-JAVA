@@ -7,12 +7,14 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.navneet.ecommerce.annotations.TrackResponceTime;
 import com.navneet.ecommerce.dto.CategoryDto;
 import com.navneet.ecommerce.entities.Category;
 import com.navneet.ecommerce.repository.CategoryDao;
 import com.navneet.ecommerce.services.CategoryServices;
 
 @Service
+@TrackResponceTime
 public class CategoryServicesImpl implements CategoryServices{
 	@Autowired
 	private ModelMapper mapper;

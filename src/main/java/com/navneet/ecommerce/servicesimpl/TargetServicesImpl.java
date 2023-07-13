@@ -7,12 +7,14 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.navneet.ecommerce.annotations.TrackResponceTime;
 import com.navneet.ecommerce.dto.TargetDto;
 import com.navneet.ecommerce.entities.Target;
 import com.navneet.ecommerce.repository.TargetDao;
 import com.navneet.ecommerce.services.TargetServices;
 
 @Service
+@TrackResponceTime
 public class TargetServicesImpl implements TargetServices{
 	@Autowired 
 	private ModelMapper mapper;

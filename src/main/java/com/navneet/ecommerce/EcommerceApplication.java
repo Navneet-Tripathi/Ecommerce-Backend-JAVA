@@ -13,7 +13,7 @@ public class EcommerceApplication {
 	}
 	
 	@Bean
-	public ModelMapper modelMapper() {
+	ModelMapper modelMapper() {
 		return new ModelMapper();
 	}
 
