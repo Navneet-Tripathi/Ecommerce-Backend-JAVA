@@ -33,6 +33,9 @@ public class Products {
 	@CreationTimestamp
 	private LocalDateTime productCreationTime;
 	
+	@Column(name = "updated_datetime", nullable = false, updatable = true ,columnDefinition = "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	private LocalDateTime productUpdationTime;
+	
 	@ManyToOne
     @JoinColumn(name = "product_categoryid", referencedColumnName = "category_id")
     private Category category;
@@ -41,7 +44,7 @@ public class Products {
 	@JoinColumn(name = "product_targetid", referencedColumnName = "target_id")
 	private Target target;
 	
-	
+	//Getters and Setters
 	public Long getProductId() {
 		return productId;
 	}
@@ -84,5 +87,12 @@ public class Products {
 	public void setTarget(Target target) {
 		this.target = target;
 	}
+	public LocalDateTime getProductUpdationTime() {
+		return productUpdationTime;
+	}
+	public void setProductUpdationTime(LocalDateTime productUpdationTime) {
+		this.productUpdationTime = productUpdationTime;
+	}
+	
 	
 }

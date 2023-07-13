@@ -8,10 +8,12 @@ public class ProductDto {
 	private String productDescription;
 	private String imageUrl;
 	private Integer productCategoryId;
-	private Integer productTargetId;
-	private LocalDateTime productCreationDateTime;
 	private String productCategoryName;
+	private Integer productTargetId;
 	private String productTargetName;
+	private LocalDateTime productCreationDateTime;
+	private LocalDateTime productUpdationTime;
+
 	
 	//Getters and Setters
 	public Long getProductId() {
@@ -68,4 +70,11 @@ public class ProductDto {
 	public void setProductTargetName(String productTargetName) {
 		this.productTargetName = productTargetName;
 	}
+	public LocalDateTime getProductUpdationTime() {
+		return productUpdationTime;
+	}
+	public void setProductUpdationTime(LocalDateTime prouductUpdationTime) {
+		this.productUpdationTime = prouductUpdationTime;
+	}
+	
 }
