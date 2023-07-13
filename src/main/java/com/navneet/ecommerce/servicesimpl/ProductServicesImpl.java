@@ -35,7 +35,9 @@ public class ProductServicesImpl implements ProductServices{
 	@Override
 	public List<ProductDto> getAllProducts(Integer pageNumber, Integer pageSize) {
 		Pageable page = PageRequest.of(pageNumber, pageSize);
+		System.out.println("------------------ findAll(page) ---------------");
 		Page<Products> pageList = this.productDao.findAll(page);
+		System.out.println("------------------ getContent() ---------------");
 		List<Products> productList = pageList.getContent();
 		List<ProductDto> dtoList = new ArrayList<>();
 		
