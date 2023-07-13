@@ -3,9 +3,11 @@ package com.navneet.ecommerce.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,16 +47,35 @@ public class Controller {
 	
 	                             /* --- APIs for Category entities --- */
 	
+	//Fetching all the available categories
 	@GetMapping("/categories")
 	public List<CategoryDto> getCategoryList(){
 		return this.categoryServices.getAllCategory();
 	}
 	
+	//Fetch a category entity by id
+	@GetMapping("/categories/{categoryId}")
+	public CategoryDto getById(@PathVariable Integer categoryId) {
+		return this.categoryServices.getCategoryById(categoryId);
+	}
+	
+	//API to post a category entity
 	@PostMapping("/categories")
 	public CategoryDto addCategory(@RequestBody CategoryDto dto) {
 		return this.categoryServices.addACategory(dto);
 	}
 	
+	//API to update a category entity
+	@PutMapping("/categories/{categoryId}")
+	public CategoryDto updateCategory(@RequestBody CategoryDto dto, @PathVariable Integer categoryId) {
+		return this.categoryServices.updateACategory(dto, categoryId);
+	}
+	
+	//API to delete a category entity
+	@DeleteMapping("/categories/{categoryId}")
+	public String deleteCategory(@PathVariable Integer categoryId) {
+		return this.categoryServices.deleteACategory(categoryId);
+	}
 	                            /* --- APIs for Color entities --- */
 	
 	@GetMapping("/colors")

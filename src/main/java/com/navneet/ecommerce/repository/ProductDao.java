@@ -1,5 +1,7 @@
 package com.navneet.ecommerce.repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -10,4 +12,7 @@ import com.navneet.ecommerce.entities.Products;
 public interface ProductDao extends JpaRepository<Products, Long>{
 	@EntityGraph(attributePaths = {"category", "target"})
 	public Page<Products> findAll(Pageable page);
+	
+	@EntityGraph(attributePaths = {"category", "target"})
+	public List<Products> findAll();
 }

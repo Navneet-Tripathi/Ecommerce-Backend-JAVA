@@ -22,6 +22,7 @@ public class CategoryServicesImpl implements CategoryServices{
 	@Autowired
 	private CategoryDao categoryDao;
 	
+	//Method to fetch all the categories
 	@Override
 	public List<CategoryDto> getAllCategory() {
 		List<Category> categoryList = this.categoryDao.findAll();
@@ -32,7 +33,15 @@ public class CategoryServicesImpl implements CategoryServices{
 		}
 		return dtoList;
 	}
+	
+	//Method to fetch a category by id
+	@Override
+	public CategoryDto getCategoryById(Integer categoryId) {
+		Category category = this.categoryDao.getReferenceById(categoryId);
+		return this.convertToDto(category);
+	}
 
+	//Method to add a category entity
 	@Override
 	public CategoryDto addACategory(CategoryDto dto) {
 		Category category = this.convertToCategory(dto);
@@ -42,12 +51,31 @@ public class CategoryServicesImpl implements CategoryServices{
 		dto = this.convertToDto(category);
 		return dto;
 	}
+	
+	//Method to update a category entity
+	@Override
+	public CategoryDto updateACategory(CategoryDto dto, Integer categoryId) {
+		Category category = this.categoryDao.getReferenceById(categoryId);
+		category.setCategoryName(dto.getCategoryName());
+		Category updatedCategory =  this.categoryDao.save(category);
+		return this.convertToDto(updatedCategory);
+	}
+	
+	//Method to delete a category entity
+	@Override
+	public String deleteACategory(Integer categoryId) {
+		Category categoryToDelete = this.categoryDao.getReferenceById(categoryId);
+		this.categoryDao.delete(categoryToDelete);
+		return "Success";
+	}
 
+	//Method to convert category-entity to category-dto
 	public CategoryDto convertToDto(Category category) {
 		CategoryDto dto = this.mapper.map(category, CategoryDto.class);
 		return dto;
 	}
 	
+	//Method to convert category-dto to category-entity
 	public Category convertToCategory(CategoryDto dto) {
 		Category category = this.mapper.map(dto, Category.class);
 		return category;
