@@ -1,6 +1,7 @@
 package com.navneet.ecommerce.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ProductDto {
 	private Long productId;
@@ -13,6 +14,8 @@ public class ProductDto {
 	private String productTargetName;
 	private LocalDateTime productCreationDateTime;
 	private LocalDateTime productUpdationTime;
+	private List<ColorDto> colorList;
+	private List<SizeDto> sizeList;
 
 	
 	//Getters and Setters
@@ -76,5 +79,16 @@ public class ProductDto {
 	public void setProductUpdationTime(LocalDateTime prouductUpdationTime) {
 		this.productUpdationTime = prouductUpdationTime;
 	}
-	
+	public List<ColorDto> getColorList() {
+		return colorList;
+	}
+	public void setColorList(List<ColorDto> colorList) {
+		this.colorList = colorList;
+	}
+	public List<SizeDto> getSizeList() {
+		return sizeList;
+	}
+	public void setSizeList(List<SizeDto> sizeList) {
+		this.sizeList = sizeList;
+	}
 }

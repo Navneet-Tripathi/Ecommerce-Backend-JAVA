@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class ResponseTimeTracker {
 	private Logger logger = LoggerFactory.getLogger(ResponseTimeTracker.class);
 	
-	@Around("@within(com.navneet.ecommerce.annotations.TrackResponceTime)")
+	@Around("@within(com.navneet.ecommerce.annotations.TrackResponceTime) || @annotation(com.navneet.ecommerce.annotations.TrackResponceTime)")
 	public Object trackTime(ProceedingJoinPoint point) throws Throwable {
 		long startTime = System.currentTimeMillis();
 		Object object = point.proceed();

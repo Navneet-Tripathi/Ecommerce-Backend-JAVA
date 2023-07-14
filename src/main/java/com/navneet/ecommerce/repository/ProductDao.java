@@ -10,9 +10,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.navneet.ecommerce.entities.Products;
 
 public interface ProductDao extends JpaRepository<Products, Long>{
-	@EntityGraph(attributePaths = {"category", "target"})
+	@EntityGraph(attributePaths = {"category", "target", "productVariants", "productVariants.color", "productVariants.size"})
 	public Page<Products> findAll(Pageable page);
 	
-	@EntityGraph(attributePaths = {"category", "target"})
+	@EntityGraph(attributePaths = {"category", "target", "productVariants", "productVariants.color", "productVariants.size"})
 	public List<Products> findAll();
 }

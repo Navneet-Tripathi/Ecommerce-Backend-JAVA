@@ -2,6 +2,9 @@ package com.navneet.ecommerce.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -11,6 +14,12 @@ import com.navneet.ecommerce.entities.Size;
 import com.navneet.ecommerce.entities.Color;
 
 public interface ProductVariantsDao extends JpaRepository<ProductVariants, Long>{
+	@EntityGraph(attributePaths = {"color", "size"})
+	public Page<ProductVariants> findAll(Pageable page);
+	
+	@EntityGraph(attributePaths = {"color", "size"})
+	public List<ProductVariants> findAll();
+	
 	@Query("SELECT DISTINCT pv.color FROM ProductVariants pv WHERE pv.products = ?1")
     public List<Color> findDistinctColors(Products products);
 	

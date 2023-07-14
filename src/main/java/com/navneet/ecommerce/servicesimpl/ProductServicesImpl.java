@@ -10,14 +10,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.navneet.ecommerce.annotations.TrackResponceTime;
+import com.navneet.ecommerce.dto.ColorDto;
 import com.navneet.ecommerce.dto.ProductDto;
+import com.navneet.ecommerce.dto.SizeDto;
 import com.navneet.ecommerce.entities.Category;
+import com.navneet.ecommerce.entities.Color;
+import com.navneet.ecommerce.entities.ProductVariants;
 import com.navneet.ecommerce.entities.Products;
+import com.navneet.ecommerce.entities.Size;
 import com.navneet.ecommerce.entities.Target;
 import com.navneet.ecommerce.repository.CategoryDao;
 import com.navneet.ecommerce.repository.ProductDao;
 import com.navneet.ecommerce.repository.TargetDao;
+import com.navneet.ecommerce.services.ColorServices;
 import com.navneet.ecommerce.services.ProductServices;
+import com.navneet.ecommerce.services.SizeServices;
 
 @Service
 @TrackResponceTime
@@ -30,6 +37,12 @@ public class ProductServicesImpl implements ProductServices{
 	
 	@Autowired
 	private TargetDao targetDao;
+	
+	@Autowired
+	private ColorServices colorServices;
+	
+	@Autowired
+	private SizeServices sizeServices;
 	
 	//Method to fetch all products in the database using pagination concept
 	@Override
@@ -79,6 +92,32 @@ public class ProductServicesImpl implements ProductServices{
 		dto.setProductCategoryName(product.getCategory().getCategoryName());
 		dto.setProductTargetName(product.getTarget().getTargetName());
 		dto.setProductUpdationTime(product.getProductUpdationTime());
+		
+		
+		List<Color> colorList = new ArrayList<>();
+		List<ColorDto> dtoColorList = new ArrayList<>();
+		
+		List<Size> sizeList = new ArrayList<>();
+		List<SizeDto> dtoSizeList = new ArrayList<>();
+		
+		/* Injecting ColorList and SizeList in product DTO */
+		for(ProductVariants variants : product.getProductVariants()) {
+			Color color = variants.getColor();
+			Size size = variants.getSize();
+			
+			if(!colorList.contains(color)) {
+				ColorDto colorDto = this.colorServices.convertToDto(color);
+				dtoColorList.add(colorDto);
+				colorList.add(color);
+			}
+			if(!sizeList.contains(size)) {
+				SizeDto sizeDto = this.sizeServices.convertToDto(size);
+				dtoSizeList.add(sizeDto);
+				sizeList.add(size);
+			}
+		}
+		dto.setColorList(dtoColorList);
+		dto.setSizeList(dtoSizeList);
 		return dto;
 	}
 	
