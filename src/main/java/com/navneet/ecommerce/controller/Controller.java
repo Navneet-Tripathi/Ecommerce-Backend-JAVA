@@ -1,5 +1,6 @@
 package com.navneet.ecommerce.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.navneet.ecommerce.dto.CategoryDto;
 import com.navneet.ecommerce.dto.ColorDto;
+import com.navneet.ecommerce.dto.ParentDto;
 import com.navneet.ecommerce.dto.ProductDto;
 import com.navneet.ecommerce.dto.ProductVariantDto;
 import com.navneet.ecommerce.dto.SizeDto;
@@ -24,6 +26,7 @@ import com.navneet.ecommerce.services.ProductServices;
 import com.navneet.ecommerce.services.ProductVariantsServices;
 import com.navneet.ecommerce.services.SizeServices;
 import com.navneet.ecommerce.services.TargetServices;
+
 
 @RestController
 public class Controller {
@@ -117,22 +120,49 @@ public class Controller {
 	
 	//Fetching all the products from the database using pagination
 	@GetMapping("/products")
-	public List<ProductDto> getProducts(
+	public List<ParentDto> getProducts(
 			@RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
-			@RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize){
-		return this.productServices.getAllProducts(pageNumber, pageSize);
+			@RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+			@RequestParam(value = "targetName", defaultValue = "", required = false) String targetName,
+			@RequestParam(value = "categoryName", defaultValue = "", required = false) String categoryName,
+			@RequestParam(value = "productName", defaultValue = "", required = false) String productName,
+			@RequestParam(value = "colorName", defaultValue = "", required = false) String colorName){
+		List<ParentDto> dtoList;
+		if(targetName.isBlank() && categoryName.isBlank() & productName.isBlank() & colorName.isBlank()) {
+			List<ProductDto> productDtos = this.productServices.getAllProducts(pageNumber, pageSize);
+			dtoList = new ArrayList<>(productDtos);
+			
+		}else if(productName.isBlank()){
+			List<ProductDto> productDtos = this.productServices.getAllProductsWithFilter(pageNumber, pageSize, targetName, categoryName, colorName);
+			dtoList = new ArrayList<>(productDtos);
+		}else { 
+			dtoList = this.productServices.getAllProductsWithName(pageNumber, pageSize, productName, targetName, categoryName, colorName);
+		}
+		return dtoList;
 	}
 	
+	
+
 	//Fetch a product from the database according to its id
 	@GetMapping("/products/{productId}")
 	public ProductDto getAProduct(@PathVariable Long productId) {
 		return this.productServices.getAProduct(productId);
 	}
 	
+	/*
 	@PostMapping("/products")
 	public ProductDto addAProduct(@RequestBody ProductDto dto) {
 		return this.productServices.addAProduct(dto);
 	}
+	
+
+	@GetMapping(path = "/allProducts")
+	public List<Products> getAllProducts(
+			@RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pagetNumber,
+			@RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize){
+		return this.productServices.getProductEntities(pagetNumber, pageSize);
+	}
+	*/
 	
 	                         /* --- APIs for ProductVariants entities --- */
 

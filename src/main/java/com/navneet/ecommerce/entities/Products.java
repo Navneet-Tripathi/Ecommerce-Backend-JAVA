@@ -1,9 +1,10 @@
 package com.navneet.ecommerce.entities;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
+
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,7 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -45,9 +45,6 @@ public class Products {
 	@ManyToOne
 	@JoinColumn(name = "product_targetid", referencedColumnName = "target_id")
 	private Target target;
-	
-	@OneToMany(mappedBy = "products")
-	private List<ProductVariants> productVariants;
 	
 	//Getters and Setters
 	public Long getProductId() {
@@ -97,11 +94,5 @@ public class Products {
 	}
 	public void setProductUpdationTime(LocalDateTime productUpdationTime) {
 		this.productUpdationTime = productUpdationTime;
-	}
-	public List<ProductVariants> getProductVariants() {
-		return productVariants;
-	}
-	public void setProductVariants(List<ProductVariants> productVariants) {
-		this.productVariants = productVariants;
 	}
 }

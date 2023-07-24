@@ -3,7 +3,7 @@ package com.navneet.ecommerce.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ProductDto implements ParentDto{
+public class Variant implements ParentDto{
 	private Long productId;
 	private String productName;
 	private String productDescription;
@@ -12,18 +12,18 @@ public class ProductDto implements ParentDto{
 	private String productTargetName;
 	private LocalDateTime productCreationDateTime;
 	private LocalDateTime productUpdationTime;
-	private List<String> colorList;
+	private String colorName;
 	private List<String> sizeList;
 	
 	//Default Constructor
-	public ProductDto() {
-
+	public Variant() {
+		
 	}
 
 	//Parameterized Constructor
-	public ProductDto(Long productId, String productName, String productDescription, String imageUrl,
+	public Variant(Long productId, String productName, String productDescription, String imageUrl,
 			String productCategoryName, String productTargetName, LocalDateTime productCreationDateTime,
-			LocalDateTime productUpdationTime, List<String> colorList, List<String> sizeList) {
+			LocalDateTime productUpdationTime, String colorName, List<String> sizeList) {
 		this.productId = productId;
 		this.productName = productName;
 		this.productDescription = productDescription;
@@ -32,7 +32,7 @@ public class ProductDto implements ParentDto{
 		this.productTargetName = productTargetName;
 		this.productCreationDateTime = productCreationDateTime;
 		this.productUpdationTime = productUpdationTime;
-		this.colorList = colorList;
+		this.colorName = colorName;
 		this.sizeList = sizeList;
 	}
 	
@@ -61,12 +61,6 @@ public class ProductDto implements ParentDto{
 	public void setImageUrl(String imageUrl) {
 		this.imageUrl = imageUrl;
 	}
-	public LocalDateTime getProductCreationDateTime() {
-		return productCreationDateTime;
-	}
-	public void setProductCreationDateTime(LocalDateTime productCreationDateTime) {
-		this.productCreationDateTime = productCreationDateTime;
-	}
 	public String getProductCategoryName() {
 		return productCategoryName;
 	}
@@ -79,17 +73,23 @@ public class ProductDto implements ParentDto{
 	public void setProductTargetName(String productTargetName) {
 		this.productTargetName = productTargetName;
 	}
+	public LocalDateTime getProductCreationDateTime() {
+		return productCreationDateTime;
+	}
+	public void setProductCreationDateTime(LocalDateTime productCreationDateTime) {
+		this.productCreationDateTime = productCreationDateTime;
+	}
 	public LocalDateTime getProductUpdationTime() {
 		return productUpdationTime;
 	}
-	public void setProductUpdationTime(LocalDateTime prouductUpdationTime) {
-		this.productUpdationTime = prouductUpdationTime;
+	public void setProductUpdationTime(LocalDateTime productUpdationTime) {
+		this.productUpdationTime = productUpdationTime;
 	}
-	public List<String> getColorList() {
-		return colorList;
+	public String getColorName() {
+		return colorName;
 	}
-	public void setColorList(List<String> colorList) {
-		this.colorList = colorList;
+	public void setColorName(String colorName) {
+		this.colorName = colorName;
 	}
 	public List<String> getSizeList() {
 		return sizeList;

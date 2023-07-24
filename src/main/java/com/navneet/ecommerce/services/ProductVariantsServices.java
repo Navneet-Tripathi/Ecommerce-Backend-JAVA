@@ -18,4 +18,7 @@ public interface ProductVariantsServices {
 	
 	//Method to fetch available sizes corresponding to a color option of a product
 	public List<SizeDto> getSizeOptions(Long productId, Integer colorId);
+	
+	
+	public List<ProductVariantDto> getAllVariantsWithColor(Integer pageNumber, Integer pageSize, String productName, String colorName);
 }
