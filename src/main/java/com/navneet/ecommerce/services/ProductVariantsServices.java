@@ -20,5 +20,5 @@ public interface ProductVariantsServices {
 	public List<SizeDto> getSizeOptions(Long productId, Integer colorId);
 	
 	
-	public List<ProductVariantDto> getAllVariantsWithColor(Integer pageNumber, Integer pageSize, String productName, String colorName);
+	//public List<ProductVariantDto> getAllVariantsWithColor(Integer pageNumber, Integer pageSize, String productName, String colorName);
 }

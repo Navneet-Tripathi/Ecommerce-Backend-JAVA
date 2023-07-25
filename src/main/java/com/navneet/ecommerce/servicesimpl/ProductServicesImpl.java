@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.navneet.ecommerce.External;
 import com.navneet.ecommerce.annotations.TrackResponceTime;
 import com.navneet.ecommerce.dto.ParentDto;
 import com.navneet.ecommerce.dto.ProductDto;
@@ -48,6 +49,9 @@ public class ProductServicesImpl implements ProductServices {
 
 	@Autowired
 	private ColorDao colorDao;
+	
+	@Autowired
+	private External external;
 
 
 	// Method to fetch all products in the database using pagination concept
