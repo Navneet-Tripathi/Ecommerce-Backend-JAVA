@@ -58,8 +58,8 @@ public class ProductServicesImpl implements ProductServices {
 	@Override
 	public List<ProductDto> getAllProducts(Integer pageNumber, Integer pageSize) {
 		Pageable page = PageRequest.of(pageNumber, pageSize);
-		Page<Products> productPage = this.productDao.findAll(page);
-		List<Products> productsList = productPage.getContent();
+		//Page<Products> productPage = this.productDao.findAll(page);
+		List<Products> productsList = this.productDao.findAllProducts(pageNumber*pageSize, pageSize);
 		List<Object[]> colorsAndSizesList = this.productDao.findUniqueColorsAndSizesForProducts(productsList);
 		List<ProductDto> productDtoList = this.getProductColorAndSize(productsList, colorsAndSizesList);
 		return productDtoList;
@@ -87,8 +87,8 @@ public class ProductServicesImpl implements ProductServices {
 			Set<String> sizes = sizesMap.getOrDefault(productId, Collections.emptySet());
 
 			ProductDto productDto = new ProductDto(product.getProductId(), product.getProductName(),
-					product.getProductDescription(), product.getImageUrl(), product.getCategory().getCategoryName(),
-					product.getTarget().getTargetName(), product.getProductCreationTime(),
+					product.getProductDescription(), product.getImageUrl(), product.getProductCategoryName(),
+					product.getProductTargetName(), product.getProductCreationTime(),
 					product.getProductUpdationTime(), new ArrayList<>(colors), new ArrayList<>(sizes));
 
 			productDtoList.add(productDto);
@@ -101,23 +101,15 @@ public class ProductServicesImpl implements ProductServices {
 	@Override
 	public List<ProductDto> getAllProductsWithFilter(Integer pageNumber, Integer pageSize, String targetName,
 			String categoryName, String colorName) {
-		Integer targetId = null;
-		Integer categoryId = null;
+		if(targetName.isBlank()) targetName = null;
+		if(categoryName.isBlank()) categoryName = null;
 		Integer colorId = null;
-
-		Target target = this.targetDao.findTargetByTargetNameIgnoreCase(targetName);
-		Category category = this.categoryDao.findCategoryByCategoryNameIgnoreCase(categoryName);
 		Color color = this.colorDao.findColorByColorNameIgnoreCase(colorName);
-
-		if (target != null)
-			targetId = target.getTargetId();
-		if (category != null)
-			categoryId = category.getCategoryId();
 		if (color != null)
 			colorId = color.getColorId();
 
 		Pageable page = PageRequest.of(pageNumber, pageSize);
-		Page<Products> productPage = this.productDao.findProductsByFilters(categoryId, targetId, colorId, page);
+		Page<Products> productPage = this.productDao.findProductsByFilters(categoryName, targetName, colorId, page);
 		List<Products> productsList = productPage.getContent();
 		List<Object[]> colorsAndSizesList = this.productDao.findUniqueColorsAndSizesForProducts(productsList);
 		List<ProductDto> productDtoList = this.getProductColorAndSize(productsList, colorsAndSizesList);
@@ -176,26 +168,19 @@ public class ProductServicesImpl implements ProductServices {
 	// 
 	@Override
 	public List<ParentDto> getAllProductsWithName(Integer pageNumber, Integer pageSize, String productName, String targetName, String categoryName, String colorName) {
-		Integer targetId;
-		Integer categoryId;
-		Integer colorId;
-
+		
 		if(targetName.isBlank()) {
-			targetId = null;
+			targetName = null;
 		}else {
-			Target target = this.targetDao.findTargetByTargetNameIgnoreCase(targetName);
-			if (target != null) targetId = target.getTargetId();
-			else targetId = 0;
+			targetName = targetName.toLowerCase();
 		}
-		
 		if(categoryName.isBlank()) {
-			categoryId = null;
+			categoryName = null;
 		}else {
-			Category category = this.categoryDao.findCategoryByCategoryNameIgnoreCase(categoryName);
-			if (category != null) categoryId = category.getCategoryId();
-			else categoryId = 0;
+			categoryName = categoryName.toLowerCase();
 		}
 		
+		Integer colorId;
 		if(colorName.isBlank()) {
 			colorId = null;
 		}else {
@@ -204,11 +189,8 @@ public class ProductServicesImpl implements ProductServices {
 			else colorId = 0;
 		}
 		
-		System.out.println("------------ Color ID : -------------"+ colorId);
-		System.out.println("------------ Category ID : -------------"+ categoryId);
-		System.out.println("------------ Target ID : -------------"+ targetId);
 		Pageable page = PageRequest.of(pageNumber, pageSize);
-		Page<Products> productPage = this.productDao.findProductsByName(page, productName.toLowerCase(), categoryId, targetId, colorId);
+		Page<Products> productPage = this.productDao.findProductsByName(page, productName.toLowerCase(), categoryName, targetName, colorId);
 		List<Products> productsList = productPage.getContent();
 		List<Object[]> colorsAndSizesList = this.productDao.findUniqueColorsAndSizesForProducts(productsList);
 		List<ProductDto> productDtoList = this.getProductColorAndSize(productsList, colorsAndSizesList);

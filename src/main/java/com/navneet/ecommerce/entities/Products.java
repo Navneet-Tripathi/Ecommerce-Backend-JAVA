@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -38,13 +39,19 @@ public class Products {
 	@Column(name = "updated_datetime", nullable = false, updatable = true ,columnDefinition = "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private LocalDateTime productUpdationTime;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_categoryid", referencedColumnName = "category_id")
     private Category category;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_targetid", referencedColumnName = "target_id")
 	private Target target;
+	
+	@Column(name = "product_categoryname")
+	private String productCategoryName;
+	
+	@Column(name = "product_targetname")
+	private String productTargetName;
 	
 	//Getters and Setters
 	public Long getProductId() {
@@ -94,5 +101,17 @@ public class Products {
 	}
 	public void setProductUpdationTime(LocalDateTime productUpdationTime) {
 		this.productUpdationTime = productUpdationTime;
+	}
+	public String getProductCategoryName() {
+		return productCategoryName;
+	}
+	public void setProductCategoryName(String productCategoryName) {
+		this.productCategoryName = productCategoryName;
+	}
+	public String getProductTargetName() {
+		return productTargetName;
+	}
+	public void setProductTargetName(String productTargetName) {
+		this.productTargetName = productTargetName;
 	}
 }

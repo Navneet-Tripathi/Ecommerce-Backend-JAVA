@@ -14,8 +14,8 @@ import com.navneet.ecommerce.entities.Products;
 @TrackResponceTime
 public interface ProductDao extends JpaRepository<Products, Long> {
 	// Method to fetch a product entity along with its related entities
-	@Query("SELECT p FROM Products p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.target")
-	public Page<Products> findAllProducts(Pageable page);
+    @Query(value = "SELECT * FROM products p LEFT JOIN category c ON p.product_categoryid = c.category_id LEFT JOIN target t ON p.product_targetid = t.target_id LIMIT :pageNumber, :pageSize", nativeQuery = true)
+	public List<Products> findAllProducts(Integer pageNumber, Integer pageSize);
 
 	// Method to fetch productId, colorName, and sizeName corresponding to a product
 	@Query("SELECT p.productId, c.colorName, s.sizeName FROM Products p "
@@ -26,23 +26,20 @@ public interface ProductDao extends JpaRepository<Products, Long> {
 
 
 	// Method to fetch product based on some applied filters
-	@Query("SELECT DISTINCT p FROM Products p " +
-	        "LEFT JOIN FETCH p.category c " +
-	        "LEFT JOIN FETCH p.target t " +
-	        "WHERE COALESCE(:categoryId, p.category.categoryId) = p.category.categoryId " +
-	        "AND COALESCE(:targetId, p.target.targetId) = p.target.targetId " +
-	        "AND (COALESCE(:colorId, -1) = -1 OR EXISTS (SELECT 1 FROM ProductVariants pv " +
-	        "JOIN pv.color clr " +
-	        "WHERE pv.products = p AND COALESCE(:colorId, clr.colorId) = clr.colorId))")
-	Page<Products> findProductsByFilters(Integer categoryId, Integer targetId, Integer colorId, Pageable pageable);
-
-	@Query("SELECT p FROM Products p " + "LEFT JOIN FETCH p.category c " + "LEFT JOIN FETCH p.target t "
-			+ "WHERE (LOWER(p.productName) LIKE %:searchedString% )"
-			+ "AND (:categoryId IS NULL OR p.category.categoryId = :categoryId) "
-			+ "AND (:targetId IS NULL OR p.target.targetId = :targetId) "
+	@Query("SELECT p FROM Products p "
+			+ "WHERE (:categoryName IS NULL OR LOWER(p.productCategoryName) = :categoryName) "
+			+ "AND (:targetName IS NULL OR LOWER(p.productTargetName) = :targetName) "
 			+ "AND p IN (SELECT DISTINCT pv.products FROM ProductVariants pv " + "JOIN pv.color clr "
 			+ "WHERE (:colorId IS NULL OR clr.colorId = :colorId) )")
-	public Page<Products> findProductsByName(Pageable page, String searchedString, Integer categoryId, Integer targetId,
+	Page<Products> findProductsByFilters(String categoryName, String targetName, Integer colorId, Pageable pageable);
+
+	@Query("SELECT p FROM Products p "
+			+ "WHERE (LOWER(p.productName) LIKE %:searchedString% )"
+			+ "AND (:categoryName IS NULL OR LOWER(p.productCategoryName) = :categoryName) "
+			+ "AND (:targetName IS NULL OR LOWER(p.productTargetName) = :targetName) "
+			+ "AND p IN (SELECT DISTINCT pv.products FROM ProductVariants pv " + "JOIN pv.color clr "
+			+ "WHERE (:colorId IS NULL OR clr.colorId = :colorId) )")
+	public Page<Products> findProductsByName(Pageable page, String searchedString, String categoryName, String targetName,
 			Integer colorId);
 	
 	@Query("Select DISTINCT pv.products from ProductVariants pv "+ "WHERE (LOWER(pv.products.productName) LIKE %:searchedString%)")
