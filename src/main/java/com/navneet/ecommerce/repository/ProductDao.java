@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -23,6 +24,7 @@ public interface ProductDao extends JpaRepository<Products, Long> {
 			+ "GROUP BY p.productId, c.colorName, s.sizeName")
 	public List<Object[]> findUniqueColorsAndSizesForProducts(List<Products> products);
 
+
 	// Method to fetch product based on some applied filters
 	@Query("SELECT DISTINCT p FROM Products p " +
 	        "LEFT JOIN FETCH p.category c " +
@@ -34,7 +36,7 @@ public interface ProductDao extends JpaRepository<Products, Long> {
 	        "WHERE pv.products = p AND COALESCE(:colorId, clr.colorId) = clr.colorId))")
 	Page<Products> findProductsByFilters(Integer categoryId, Integer targetId, Integer colorId, Pageable pageable);
 
-	@Query("SELECT DISTINCT p FROM Products p " + "LEFT JOIN FETCH p.category c " + "LEFT JOIN FETCH p.target t "
+	@Query("SELECT p FROM Products p " + "LEFT JOIN FETCH p.category c " + "LEFT JOIN FETCH p.target t "
 			+ "WHERE (LOWER(p.productName) LIKE %:searchedString% )"
 			+ "AND (:categoryId IS NULL OR p.category.categoryId = :categoryId) "
 			+ "AND (:targetId IS NULL OR p.target.targetId = :targetId) "
@@ -42,5 +44,12 @@ public interface ProductDao extends JpaRepository<Products, Long> {
 			+ "WHERE (:colorId IS NULL OR clr.colorId = :colorId) )")
 	public Page<Products> findProductsByName(Pageable page, String searchedString, Integer categoryId, Integer targetId,
 			Integer colorId);
+	
+	@Query("Select DISTINCT pv.products from ProductVariants pv "+ "WHERE (LOWER(pv.products.productName) LIKE %:searchedString%)")
+	public Page<Products> findProducts(Pageable page, String searchedString);
+	
+	@EntityGraph(attributePaths = {"category", "target"})
+	public Page<Products> findAll(Pageable page);
+	
 
 }

@@ -58,7 +58,7 @@ public class ProductServicesImpl implements ProductServices {
 	@Override
 	public List<ProductDto> getAllProducts(Integer pageNumber, Integer pageSize) {
 		Pageable page = PageRequest.of(pageNumber, pageSize);
-		Page<Products> productPage = this.productDao.findAllProducts(page);
+		Page<Products> productPage = this.productDao.findAll(page);
 		List<Products> productsList = productPage.getContent();
 		List<Object[]> colorsAndSizesList = this.productDao.findUniqueColorsAndSizesForProducts(productsList);
 		List<ProductDto> productDtoList = this.getProductColorAndSize(productsList, colorsAndSizesList);
@@ -204,7 +204,9 @@ public class ProductServicesImpl implements ProductServices {
 			else colorId = 0;
 		}
 		
-		
+		System.out.println("------------ Color ID : -------------"+ colorId);
+		System.out.println("------------ Category ID : -------------"+ categoryId);
+		System.out.println("------------ Target ID : -------------"+ targetId);
 		Pageable page = PageRequest.of(pageNumber, pageSize);
 		Page<Products> productPage = this.productDao.findProductsByName(page, productName.toLowerCase(), categoryId, targetId, colorId);
 		List<Products> productsList = productPage.getContent();
