@@ -122,7 +122,7 @@ public class Controller {
 	@GetMapping("/products")
 	public List<ParentDto> getProducts(
 			@RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
-			@RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+			@RequestParam(value = "pageSize", defaultValue = "100", required = false) Integer pageSize,
 			@RequestParam(value = "targetName", defaultValue = "", required = false) String targetName,
 			@RequestParam(value = "categoryName", defaultValue = "", required = false) String categoryName,
 			@RequestParam(value = "productName", defaultValue = "", required = false) String productName,

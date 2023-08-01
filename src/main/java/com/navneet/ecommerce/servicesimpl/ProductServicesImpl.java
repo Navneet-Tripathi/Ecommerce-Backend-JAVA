@@ -9,12 +9,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.navneet.ecommerce.External;
 import com.navneet.ecommerce.annotations.TrackResponceTime;
 import com.navneet.ecommerce.dto.ParentDto;
 import com.navneet.ecommerce.dto.ProductDto;
@@ -49,14 +49,14 @@ public class ProductServicesImpl implements ProductServices {
 
 	@Autowired
 	private ColorDao colorDao;
-	
-	@Autowired
-	private External external;
+
 
 
 	// Method to fetch all products in the database using pagination concept
 	@Override
+	@Cacheable(value = "products", key = "{#pageNumber, #pageSize}")
 	public List<ProductDto> getAllProducts(Integer pageNumber, Integer pageSize) {
+		System.out.println("Get all products with called ------------------");
 		Pageable page = PageRequest.of(pageNumber, pageSize);
 		//Page<Products> productPage = this.productDao.findAll(page);
 		List<Products> productsList = this.productDao.findAllProducts(pageNumber*pageSize, pageSize);
@@ -99,15 +99,31 @@ public class ProductServicesImpl implements ProductServices {
 
 	// //Method to fetch a product list according to various filters
 	@Override
+	@Cacheable(value = "products", key = "{#pageNumber, #pageSize, #targetName, #categoryName, #colorName}")
 	public List<ProductDto> getAllProductsWithFilter(Integer pageNumber, Integer pageSize, String targetName,
 			String categoryName, String colorName) {
-		if(targetName.isBlank()) targetName = null;
-		if(categoryName.isBlank()) categoryName = null;
+		System.out.println("Get all products with filters called ------------------");
+		if(targetName.isBlank()) {
+			targetName = null;
+		}
+		else {
+			targetName = targetName.toLowerCase();
+		}
+		
+		
+		if(categoryName.isBlank()) {
+			categoryName = null;
+		}else {
+			categoryName = categoryName.toLowerCase();
+		}
+		
+		
 		Integer colorId = null;
-		Color color = this.colorDao.findColorByColorNameIgnoreCase(colorName);
-		if (color != null)
-			colorId = color.getColorId();
-
+		if(!colorName.isBlank()) {
+			Color color = this.colorDao.findColorByColorNameIgnoreCase(colorName);
+			if (color != null) colorId = color.getColorId();
+		}
+		
 		Pageable page = PageRequest.of(pageNumber, pageSize);
 		Page<Products> productPage = this.productDao.findProductsByFilters(categoryName, targetName, colorId, page);
 		List<Products> productsList = productPage.getContent();
@@ -167,6 +183,7 @@ public class ProductServicesImpl implements ProductServices {
 	// Method to fetch the product list according to the name and other constraints provided in the search
 	// 
 	@Override
+	@Cacheable(value = "products", key = "{#pageNumber, #pageSize, #productName, #targetName, #categoryName, #colorName}")
 	public List<ParentDto> getAllProductsWithName(Integer pageNumber, Integer pageSize, String productName, String targetName, String categoryName, String colorName) {
 		
 		if(targetName.isBlank()) {
@@ -174,6 +191,7 @@ public class ProductServicesImpl implements ProductServices {
 		}else {
 			targetName = targetName.toLowerCase();
 		}
+		
 		if(categoryName.isBlank()) {
 			categoryName = null;
 		}else {

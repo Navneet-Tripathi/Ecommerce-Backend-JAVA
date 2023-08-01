@@ -1,9 +1,11 @@
 package com.navneet.ecommerce.dto;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ProductDto implements ParentDto{
+public class ProductDto implements ParentDto, Serializable{
+	private static final long serialVersionUID = 123456789L;
 	private Long productId;
 	private String productName;
 	private String productDescription;
