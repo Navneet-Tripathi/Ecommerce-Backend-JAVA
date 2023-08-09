@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.navneet.ecommerce.dto.ParentDto;
 import com.navneet.ecommerce.dto.ProductDto;
+import com.navneet.ecommerce.dto.ProductUpdateDto;
 import com.navneet.ecommerce.entities.Products;
 
 public interface ProductServices {
@@ -14,6 +15,15 @@ public interface ProductServices {
 	
 	//Method to fetch a product according to its id
 	public ProductDto getAProduct(Long productId);
+	
+	//Method to delete a product according to its id
+	public String deleteProduct(Long productId);
+	
+	//Method to delete a product and generate a race  condition
+	public String deleteProductConcurrently(Long productId);
+	
+	//Method to update a product based on the provided product id and the dto
+	public ProductDto updateProduct(Long productId, ProductUpdateDto productDto);
 	
 	/*
 	//Method to add a product in the database
@@ -28,6 +38,13 @@ public interface ProductServices {
 
 	//Method to fetch a product list according to the name given in search bar
 	public List<ParentDto> getAllProductsWithName(Integer pageNumber, Integer pageSize, String productName, String targetName, String categoryName, String colorName);
+
+
+	
+
+
+
+	
 	
 	/*
 	//Method to convert product-dto to product-entity

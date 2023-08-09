@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,7 @@ import com.navneet.ecommerce.dto.CategoryDto;
 import com.navneet.ecommerce.dto.ColorDto;
 import com.navneet.ecommerce.dto.ParentDto;
 import com.navneet.ecommerce.dto.ProductDto;
+import com.navneet.ecommerce.dto.ProductUpdateDto;
 import com.navneet.ecommerce.dto.ProductVariantDto;
 import com.navneet.ecommerce.dto.SizeDto;
 import com.navneet.ecommerce.dto.TargetDto;
@@ -144,23 +146,32 @@ public class Controller {
 	
 
 	//Fetch a product from the database according to its id
-	@GetMapping("/products/{productId}")
+	@GetMapping(path = "/products/{productId}")
 	public ProductDto getAProduct(@PathVariable Long productId) {
-		return this.productServices.getAProduct(productId);
+		ProductDto dto = this.productServices.getAProduct(productId);
+		if(dto == null) {
+			System.out.println("No such product exists!");
+		}
+		return dto;
+	}
+	
+	//Delete a product from the database according to its id
+	@DeleteMapping(path = "/products/{productId}")
+	public String deleteAProduct(@PathVariable Long productId) {
+		return this.productServices.deleteProduct(productId);
+	}
+	
+	//Update a product based on its id
+	@PutMapping(path = "/products/{productId}")
+	public String updateAProduct(@PathVariable Long productId, @RequestBody ProductUpdateDto productDto) {
+		ProductDto dto = this.productServices.updateProduct(productId, productDto);
+        return "Success!";
 	}
 	
 	/*
 	@PostMapping("/products")
 	public ProductDto addAProduct(@RequestBody ProductDto dto) {
 		return this.productServices.addAProduct(dto);
-	}
-	
-
-	@GetMapping(path = "/allProducts")
-	public List<Products> getAllProducts(
-			@RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pagetNumber,
-			@RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize){
-		return this.productServices.getProductEntities(pagetNumber, pageSize);
 	}
 	*/
 	

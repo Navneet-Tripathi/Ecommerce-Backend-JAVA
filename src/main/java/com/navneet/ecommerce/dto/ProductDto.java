@@ -99,4 +99,14 @@ public class ProductDto implements ParentDto, Serializable{
 	public void setSizeList(List<String> sizeList) {
 		this.sizeList = sizeList;
 	}
+
+	//TO String method
+	@Override
+	public String toString() {
+		return "ProductDto [productId=" + productId + ", productName=" + productName + ", productDescription="
+				+ productDescription + ", imageUrl=" + imageUrl + ", productCategoryName=" + productCategoryName
+				+ ", productTargetName=" + productTargetName + ", productCreationDateTime=" + productCreationDateTime
+				+ ", productUpdationTime=" + productUpdationTime + ", colorList=" + colorList + ", sizeList=" + sizeList
+				+ "]";
+	}
 }

@@ -1,9 +1,12 @@
 package com.navneet.ecommerce.entities;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
-
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.OptimisticLockType;
+import org.hibernate.annotations.OptimisticLocking;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,14 +17,23 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "products")
-public class Products {
+@OptimisticLocking(type = OptimisticLockType.VERSION)
+@DynamicUpdate
+public class Products implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "product_id", nullable = false)
 	private Long productId;
+	
+	@Version
+	@Column(name = "version", nullable = false)
+	private Long version;
 	
 	@Column(name = "product_name", nullable = false)
 	private String productName;

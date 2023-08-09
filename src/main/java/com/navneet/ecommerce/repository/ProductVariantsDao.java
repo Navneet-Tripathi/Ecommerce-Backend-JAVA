@@ -6,11 +6,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.navneet.ecommerce.entities.ProductVariants;
 import com.navneet.ecommerce.entities.Products;
 import com.navneet.ecommerce.entities.Size;
+
+import jakarta.persistence.LockModeType;
+
 import com.navneet.ecommerce.entities.Color;
 
 public interface ProductVariantsDao extends JpaRepository<ProductVariants, Long>{
@@ -25,13 +30,12 @@ public interface ProductVariantsDao extends JpaRepository<ProductVariants, Long>
 	
 	@Query("SELECT DISTINCT pv.size FROM ProductVariants pv WHERE pv.products = ?1 AND pv.color = ?2 AND pv.productQuantity>0")
 	public List<Size> findDistinctSizes(Products products, Color color);
-	
-	 @Query("SELECT pv FROM ProductVariants pv "
-	           + "LEFT JOIN FETCH pv.color "
-	           + "LEFT JOIN FETCH pv.size "
-	           + "WHERE pv.products.productId = :productId")
-	 List<ProductVariants> getProductVariantsForProduct(Long productId);
 	 
 	 @Query("SELECT pv FROM ProductVariants pv JOIN FETCH pv.products p JOIN FETCH pv.color c JOIN FETCH pv.size s WHERE p.productName = :productName AND c.colorName = :colorName")
 	 public Page<ProductVariants> getVariantsWithFilter(String productName, String colorName, Pageable page);
+	 
+	 //Method to delete products variants based on productId
+	 @Modifying
+	 @Query("DELETE FROM ProductVariants pv WHERE pv.products.productId = :productId")
+	 public void deleteByProducts_ProductId(Long productId);
 }

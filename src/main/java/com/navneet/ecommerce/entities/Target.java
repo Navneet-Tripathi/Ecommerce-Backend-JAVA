@@ -1,6 +1,8 @@
 package com.navneet.ecommerce.entities;
 
 
+import java.io.Serializable;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -8,7 +10,8 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "target")
-public class Target {
+public class Target{
+
 	@Id
 	@Column(name = "target_id", nullable = false)
 	private Integer  targetId;
