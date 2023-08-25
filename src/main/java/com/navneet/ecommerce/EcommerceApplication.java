@@ -16,8 +16,10 @@ import com.navneet.ecommerce.raceconditiontester.RaceCondition;
 public class EcommerceApplication {
 	public static void main(String[] args) {
 		ConfigurableApplicationContext context = SpringApplication.run(EcommerceApplication.class, args);
+		/*
 		RaceCondition raceCondition = context.getBean(RaceCondition.class);
 		raceCondition.run();
+		*/
 	}
 	
 	@Bean

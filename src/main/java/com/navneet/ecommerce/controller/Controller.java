@@ -22,6 +22,7 @@ import com.navneet.ecommerce.dto.ProductUpdateDto;
 import com.navneet.ecommerce.dto.ProductVariantDto;
 import com.navneet.ecommerce.dto.SizeDto;
 import com.navneet.ecommerce.dto.TargetDto;
+import com.navneet.ecommerce.esmodel.Product;
 import com.navneet.ecommerce.services.CategoryServices;
 import com.navneet.ecommerce.services.ColorServices;
 import com.navneet.ecommerce.services.ProductServices;
@@ -174,6 +175,11 @@ public class Controller {
 		return this.productServices.addAProduct(dto);
 	}
 	*/
+	
+	@GetMapping(path = "/es/products")
+	public Iterable<Product> getEsProducts(){
+		return this.productServices.getProducts();
+	}
 	
 	                         /* --- APIs for ProductVariants entities --- */
 

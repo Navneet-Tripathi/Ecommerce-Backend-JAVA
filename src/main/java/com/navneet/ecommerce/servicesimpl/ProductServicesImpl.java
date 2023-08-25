@@ -14,6 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.sound.midi.SysexMessage;
 
+import org.hibernate.metamodel.model.domain.internal.AbstractSqmPathSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,8 @@ import com.navneet.ecommerce.entities.Category;
 import com.navneet.ecommerce.entities.Color;
 import com.navneet.ecommerce.entities.Products;
 import com.navneet.ecommerce.entities.Target;
+import com.navneet.ecommerce.esmodel.Product;
+import com.navneet.ecommerce.esrepository.ProductRepo;
 import com.navneet.ecommerce.repository.CategoryDao;
 import com.navneet.ecommerce.repository.ColorDao;
 import com.navneet.ecommerce.repository.ProductDao;
@@ -72,10 +75,19 @@ public class ProductServicesImpl implements ProductServices {
 	@Autowired
 	private RedisCacheManager cacheManager;
 	
+	@Autowired
+	private ProductRepo productRepo;
+	
 	private Logger logger = LoggerFactory.getLogger(ProductServicesImpl.class);
-
-
-
+	
+	/* ---------------------------------------------- ES OPERATIONS ---------------------------------------------- */
+	@Override
+	public Iterable<Product> getProducts(){
+		return this.productRepo.findAll();
+	}
+	
+	
+	/* ---------------------------------------------- MYSQL OPERATIONS ---------------------------------------------- */
 	// Method to fetch all products in the database using pagination concept
 	@Override
 	@Transactional
@@ -281,17 +293,19 @@ public class ProductServicesImpl implements ProductServices {
 
 	//Method to delete a product according to its id
 	@Override
-	@Transactional(isolation = Isolation.READ_COMMITTED)
+	@Transactional
 	@CacheEvict(value = "product", key = "#productId")
 	@Retryable(retryFor = ObjectOptimisticLockingFailureException.class, maxAttempts = 3, backoff = @Backoff(delay = 2000, multiplier = 2))
 	public String deleteProduct(Long productId) {
 		try {
 			Products product = this.productDao.findById(productId).orElse(null);
+			
 			if(product == null) {
 				return "Product doesn't exists!";
 			}else {
 				this.productDao.deleteByProductId(productId);
 				this.variantsDao.deleteByProducts_ProductId(productId);
+				
 				cacheManager.getCache("listing").clear();
 				return "Success!";
 			}
@@ -306,43 +320,10 @@ public class ProductServicesImpl implements ProductServices {
 		return null;
 		
 	}
-	
-	//Method to delete a product concurrently and generate a race condition
-	@Override
-	@CacheEvict(value = "product", key = "#productId")
-	public String deleteProductConcurrently(Long productId) {
-		System.out.println("----------I am at the beginning of the method call!------------");
-		Products product = this.productDao.findById(productId).orElse(null);
-		if(product == null) {
-			return "Product doesn't exists!";
-		}else {
-			ExecutorService executorService = Executors.newFixedThreadPool(2);
-
-	        // Running a delete task
-	        executorService.submit(() -> {
-	            System.out.println("----------Running Delete task concurrently!----------");
-	            this.productDao.delete(product);
-	            this.variantsDao.deleteByProducts_ProductId(productId);
-	            cacheManager.getCache("listing").clear();
-	        });
-
-	        // Running another delete task concurrently
-	        executorService.submit(() -> {
-	            System.out.println("----------Running Delete task concurrently!----------");
-	            this.productDao.delete(product);
-	            this.variantsDao.deleteByProducts_ProductId(productId);
-	            cacheManager.getCache("listing").clear();
-	        });
-
-	        executorService.shutdown();
-
-	        return "Success!";
-		}
-	}
 
 	//Method to update a product according to its id
 	@Override
-	@Transactional(isolation = Isolation.READ_COMMITTED)
+	@Transactional
 	@CachePut(value = "product", key = "#productId")
 	@Retryable(retryFor = ObjectOptimisticLockingFailureException.class, maxAttempts = 3, backoff = @Backoff(delay = 2000, multiplier = 2))
 	public ProductDto updateProduct(Long productId, ProductUpdateDto productDto) {
@@ -381,6 +362,11 @@ public class ProductServicesImpl implements ProductServices {
 				}
 				List<Object[]> colorsAndSizesList = this.productDao.findUniqueColorsAndSizesForAProduct(savedProducts);
 				ProductDto resultDto = this.getProductDtoWithColorAndSize(savedProducts, colorsAndSizesList);
+				try {
+					Thread.sleep(300000);
+				}catch (InterruptedException e) {
+					// TODO: handle exception
+				}
 				cacheManager.getCache("listing").clear();
 				cacheManager.getCache("readProduct").clear();
 				return resultDto;

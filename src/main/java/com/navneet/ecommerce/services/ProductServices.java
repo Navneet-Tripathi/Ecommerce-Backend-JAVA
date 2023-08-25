@@ -7,6 +7,7 @@ import com.navneet.ecommerce.dto.ParentDto;
 import com.navneet.ecommerce.dto.ProductDto;
 import com.navneet.ecommerce.dto.ProductUpdateDto;
 import com.navneet.ecommerce.entities.Products;
+import com.navneet.ecommerce.esmodel.Product;
 
 public interface ProductServices {
 	//Method to fetch all the products from database using pagination
@@ -18,9 +19,6 @@ public interface ProductServices {
 	
 	//Method to delete a product according to its id
 	public String deleteProduct(Long productId);
-	
-	//Method to delete a product and generate a race  condition
-	public String deleteProductConcurrently(Long productId);
 	
 	//Method to update a product based on the provided product id and the dto
 	public ProductDto updateProduct(Long productId, ProductUpdateDto productDto);
@@ -41,7 +39,8 @@ public interface ProductServices {
 
 
 	
-
+	/* ------------------------------------------- ES OPERATIONS ------------------------------------------- */
+	public Iterable<Product> getProducts();
 
 
 	
