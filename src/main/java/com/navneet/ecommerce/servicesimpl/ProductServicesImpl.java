@@ -1,20 +1,17 @@
 package com.navneet.ecommerce.servicesimpl;
 
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import javax.sound.midi.SysexMessage;
 
-import org.hibernate.metamodel.model.domain.internal.AbstractSqmPathSource;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +26,10 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
+
 import org.springframework.transaction.annotation.Transactional;
 
 import com.navneet.ecommerce.annotations.TrackResponceTime;
-import com.navneet.ecommerce.aop.ResponseTimeTracker;
 import com.navneet.ecommerce.dto.ParentDto;
 import com.navneet.ecommerce.dto.ProductDto;
 import com.navneet.ecommerce.dto.ProductUpdateDto;
@@ -78,12 +74,55 @@ public class ProductServicesImpl implements ProductServices {
 	@Autowired
 	private ProductRepo productRepo;
 	
+	@Autowired
+	private ModelMapper mapper;
+	
 	private Logger logger = LoggerFactory.getLogger(ProductServicesImpl.class);
 	
 	/* ---------------------------------------------- ES OPERATIONS ---------------------------------------------- */
+	//Method to fetch products from elastic search
 	@Override
-	public Iterable<Product> getProducts(){
-		return this.productRepo.findAll();
+	public List<Product> getProducts(Integer pageNumber, Integer pageSize){
+		Pageable page = PageRequest.of(pageNumber, pageSize);
+		Page<Product> productPage = this.productRepo.findAll(page);
+		List<Product> productList = productPage.getContent();
+		return productList;
+	}
+	
+	//Method to add a product 
+	@Override
+	@Transactional
+	public String addProductES(ProductUpdateDto dto) {
+		Products savedDBProduct = this.addProductDB(dto);
+ 		List<Object[]> colorsAndSizesList = this.productDao.findUniqueColorsAndSizesForAProduct(savedDBProduct);
+		ProductDto productDto = this.getProductDtoWithColorAndSize(savedDBProduct, colorsAndSizesList);
+		Product esProduct = this.convertToESProduct(productDto);
+		
+		System.out.println("---------- creation date : ------------"+ esProduct.getProductCreationDateTime());
+		Product savedESProduct = this.productRepo.save(esProduct);
+		
+		if(savedESProduct == null) {
+			//Throw and Handle Exception
+		}
+		return "Product Saved succesfully with id : "+ savedESProduct.getProductId();
+	}
+	
+	// Method to convert product-entity list to product-dto list--> For ElasticSearch operation
+	@Override
+	public List<ProductDto> convertToDtoList(List<Product> productList) {
+		List<ProductDto> dtoList = new ArrayList<>();
+		for(Product product: productList) {
+			ProductDto dto = this.mapper.map(product, ProductDto.class);
+			dtoList.add(dto);
+		}
+		return dtoList;
+	}
+	
+	//Method to convert product-dto to product-entity --> For ElasticSearch operation
+	@Override
+	public Product convertToESProduct(ProductDto dto) {
+		Product esProduct = this.mapper.map(dto, Product.class);
+		return esProduct;
 	}
 	
 	
@@ -102,7 +141,8 @@ public class ProductServicesImpl implements ProductServices {
 	}
 
 	//Method to get a productDto list containing details of a product and its corresponding available color and sizes
-	private List<ProductDto> getProductColorAndSize(List<Products> productsList, List<Object[]> colorsAndSizesList) {
+	@Override
+	public List<ProductDto> getProductColorAndSize(List<Products> productsList, List<Object[]> colorsAndSizesList) {
 		Map<Long, Set<String>> colorsMap = new HashMap<>();
 		Map<Long, Set<String>> sizesMap = new HashMap<>();
 
@@ -192,7 +232,8 @@ public class ProductServicesImpl implements ProductServices {
 	}
 
 	//Method to get a product dto with all the necessary details of color and size corresponding to a product
-	private ProductDto getProductDtoWithColorAndSize(Products product, List<Object[]> colorsAndSizesList) {
+	@Override
+	public ProductDto getProductDtoWithColorAndSize(Products product, List<Object[]> colorsAndSizesList) {
 		Map<Long, Set<String>> colorsMap = new HashMap<>();
 		Map<Long, Set<String>> sizesMap = new HashMap<>();
 
@@ -218,23 +259,6 @@ public class ProductServicesImpl implements ProductServices {
 		return productDto;
 	}
 
-	// Method to convert product-entity to product-dto
-	@Override
-	public ProductDto convertToDto(Products product, List<String> colorList, List<String> sizeList) {
-		ProductDto dto = new ProductDto();
-		dto.setProductId(product.getProductId());
-		dto.setProductName(product.getProductName());
-		dto.setProductDescription(product.getProductDescription());
-		dto.setImageUrl(product.getImageUrl());
-		dto.setProductCreationDateTime(product.getProductCreationTime());
-		dto.setProductUpdationTime(product.getProductUpdationTime());
-		dto.setProductCategoryName(product.getProductCategoryName());
-		dto.setProductTargetName(product.getProductTargetName());
-
-		dto.setColorList(new ArrayList<>(colorList));
-		dto.setSizeList(new ArrayList<>(sizeList));
-		return dto;
-	}
 
 	// Method to fetch the product list according to the name and other constraints provided in the search
 	// 
@@ -380,6 +404,28 @@ public class ProductServicesImpl implements ProductServices {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	//Method to add a product to the mysql-db
+	@Override
+	public Products addProductDB(ProductUpdateDto dto) {
+		Category productCategory = this.categoryDao.findById(dto.getCategoryId()).orElse(null);
+		Target productTarget = this.targetDao.findById(dto.getTargetId()).orElse(null);
+		
+		String targetName = "";
+		String categoryName = "";
+		if(productCategory!=null && productTarget!=null) {
+			targetName = productTarget.getTargetName();
+			categoryName = productCategory.getCategoryName();
+		}
+ 		Products product = new Products(dto.getProductName(), dto.getProductDescription(), dto.getImageUrl(),
+ 				productCategory, productTarget, categoryName, targetName);
+ 		
+ 		Products savedProduct = this.productDao.save(product);
+ 		if(savedProduct == null) {
+ 			//Throw and handle exception
+ 		}
+ 		return savedProduct;
 	}
 
 	/*

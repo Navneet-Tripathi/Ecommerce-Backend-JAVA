@@ -6,15 +6,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.navneet.ecommerce.entities.ProductVariants;
 import com.navneet.ecommerce.entities.Products;
 import com.navneet.ecommerce.entities.Size;
-
-import jakarta.persistence.LockModeType;
 
 import com.navneet.ecommerce.entities.Color;
 
@@ -38,4 +35,12 @@ public interface ProductVariantsDao extends JpaRepository<ProductVariants, Long>
 	 @Modifying
 	 @Query("DELETE FROM ProductVariants pv WHERE pv.products.productId = :productId")
 	 public void deleteByProducts_ProductId(Long productId);
+	 
+	 //Method to retrieve a list of product-variants based on product id
+	  @Query("SELECT pv FROM ProductVariants pv "
+	            + "JOIN FETCH pv.products p "
+	            + "JOIN FETCH pv.color c "
+	            + "JOIN FETCH pv.size s "
+	            + "WHERE p.productId = :productId")
+	 List<ProductVariants> findByProducts_ProductId(Long productId);
 }

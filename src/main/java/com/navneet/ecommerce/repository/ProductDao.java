@@ -7,6 +7,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,7 +18,7 @@ import com.navneet.ecommerce.entities.Products;
 import jakarta.persistence.LockModeType;
 
 @TrackResponceTime
-public interface ProductDao extends JpaRepository<Products, Long> {
+public interface ProductDao extends JpaRepository<Products, Long>, JpaSpecificationExecutor<Products>{
 	// Method to fetch a product entity along with its related entities
     @Query(value = "SELECT * FROM products p LEFT JOIN category c ON p.product_categoryid = c.category_id LEFT JOIN target t ON p.product_targetid = t.target_id LIMIT :pageNumber, :pageSize", nativeQuery = true)
 	public List<Products> findAllProducts(Integer pageNumber, Integer pageSize);

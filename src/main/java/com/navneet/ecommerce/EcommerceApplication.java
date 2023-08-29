@@ -6,13 +6,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.navneet.ecommerce.raceconditiontester.RaceCondition;
 
 
 
 @SpringBootApplication
 @EnableRetry
+@EnableScheduling
 public class EcommerceApplication {
 	public static void main(String[] args) {
 		ConfigurableApplicationContext context = SpringApplication.run(EcommerceApplication.class, args);

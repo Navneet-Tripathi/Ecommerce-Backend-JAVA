@@ -2,8 +2,12 @@ package com.navneet.ecommerce.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +26,7 @@ import com.navneet.ecommerce.dto.ProductUpdateDto;
 import com.navneet.ecommerce.dto.ProductVariantDto;
 import com.navneet.ecommerce.dto.SizeDto;
 import com.navneet.ecommerce.dto.TargetDto;
+import com.navneet.ecommerce.entities.Products;
 import com.navneet.ecommerce.esmodel.Product;
 import com.navneet.ecommerce.services.CategoryServices;
 import com.navneet.ecommerce.services.ColorServices;
@@ -169,17 +174,42 @@ public class Controller {
         return "Success!";
 	}
 	
-	/*
 	@PostMapping("/products")
-	public ProductDto addAProduct(@RequestBody ProductDto dto) {
-		return this.productServices.addAProduct(dto);
+	public ResponseEntity<String> addAProductDB(@RequestBody ProductUpdateDto dto) {
+		try {
+			Products savedProductId = this.productServices.addProductDB(dto);
+			String message = "Product saved successfully with id : "+ savedProductId.getProductId();
+			return ResponseEntity.of(Optional.of(message));
+		}catch (Exception e) {
+			System.out.println("Exception encountered while adding the product!");
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+		
 	}
-	*/
+	
+	/* --------------------------------------- ES Operations --------------------------------------- */
 	
 	@GetMapping(path = "/es/products")
-	public Iterable<Product> getEsProducts(){
-		return this.productServices.getProducts();
+	public List<Product> getEsProducts(
+			@RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+			@RequestParam(value = "pageSize", defaultValue = "100", required = false) Integer pageSize){
+		return this.productServices.getProducts(pageNumber, pageSize);
 	}
+	
+	
+	@PostMapping(path = "/es/products")
+	public ResponseEntity<String> addAProductES(@RequestBody ProductUpdateDto dto){
+		try {
+			String message = this.productServices.addProductES(dto);
+			return ResponseEntity.of(Optional.of(message));
+		}catch (Exception e) {
+			System.out.println("Exception encountered while adding the product!");
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+	
 	
 	                         /* --- APIs for ProductVariants entities --- */
 

@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.OptimisticLockType;
 import org.hibernate.annotations.OptimisticLocking;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,6 +50,7 @@ public class Products implements Serializable {
 	private LocalDateTime productCreationTime;
 	
 	@Column(name = "updated_datetime", nullable = false, updatable = true ,columnDefinition = "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@UpdateTimestamp
 	private LocalDateTime productUpdationTime;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -64,6 +66,24 @@ public class Products implements Serializable {
 	
 	@Column(name = "product_targetname")
 	private String productTargetName;
+	
+	
+	//Default Constructor
+	public Products() {
+		// TODO Auto-generated constructor stub
+	}
+
+	//Parameterized Constructor
+	public Products(String productName, String productDescription, String imageUrl, Category category, Target target,
+			String productCategoryName, String productTargetName) {
+		this.productName = productName;
+		this.productDescription = productDescription;
+		this.imageUrl = imageUrl;
+		this.category = category;
+		this.target = target;
+		this.productCategoryName = productCategoryName;
+		this.productTargetName = productTargetName;
+	}
 	
 	//Getters and Setters
 	public Long getProductId() {
