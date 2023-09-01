@@ -8,6 +8,7 @@ import com.navneet.ecommerce.dto.ParentDto;
 import com.navneet.ecommerce.dto.ProductDto;
 import com.navneet.ecommerce.dto.ProductUpdateDto;
 import com.navneet.ecommerce.entities.Products;
+import com.navneet.ecommerce.esmodel.ESProduct;
 import com.navneet.ecommerce.esmodel.Product;
 
 public interface ProductServices {
@@ -40,15 +41,28 @@ public interface ProductServices {
 	ProductDto getProductDtoWithColorAndSize(Products product, List<Object[]> colorsAndSizesList);
 	
 	/* ------------------------------------------- ES OPERATIONS ------------------------------------------- */
-	//Method to get a list of the products from ES
-	public List<Product> getProducts(Integer pageNumber, Integer pageSize);
+	//Method to get a list of all the products from ES
+	public List<ProductDto> getProducts(Integer pageNumber, Integer pageSize);
+	
+	//Method to get a list of all the product with name
+	public List<ParentDto> getESProductsWithFilters(Integer pageNumber, Integer pageSize, String productName, String productTargetName, String productCategoryName);
+	
+	//Method to get a product from ES using productId
+	public ProductDto getAESProduct(Long productId);
 	
 	//Method to add a product to ES
 	public String addProductES(ProductUpdateDto dto);
 
 	//Method to convert product-entity to product-dto
-	public List<ProductDto> convertToDtoList(List<Product> productList);
+	public List<ProductDto> convertToDtoList(List<ESProduct> productList);
 	
+	//Method to convert ESProduct entity to dto
+	public ProductDto convertESProductToDto(ESProduct esProduct);
+	
+	//Method to delete a product from ES
+	public String deleteESProduct(Long productId);
+	
+	//Method to convert dto to ESProduct entity
 	public Product convertToESProduct(ProductDto dto);
 
 	

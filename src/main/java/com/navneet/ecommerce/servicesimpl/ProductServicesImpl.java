@@ -1,15 +1,15 @@
 package com.navneet.ecommerce.servicesimpl;
 
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -21,6 +21,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
@@ -38,7 +39,9 @@ import com.navneet.ecommerce.entities.Category;
 import com.navneet.ecommerce.entities.Color;
 import com.navneet.ecommerce.entities.Products;
 import com.navneet.ecommerce.entities.Target;
+import com.navneet.ecommerce.esmodel.ESProduct;
 import com.navneet.ecommerce.esmodel.Product;
+import com.navneet.ecommerce.esrepository.ESProductRepo;
 import com.navneet.ecommerce.esrepository.ProductRepo;
 import com.navneet.ecommerce.repository.CategoryDao;
 import com.navneet.ecommerce.repository.ColorDao;
@@ -75,18 +78,45 @@ public class ProductServicesImpl implements ProductServices {
 	private ProductRepo productRepo;
 	
 	@Autowired
+	private ESProductRepo esProductRepo;
+	
+	@Autowired
 	private ModelMapper mapper;
 	
 	private Logger logger = LoggerFactory.getLogger(ProductServicesImpl.class);
 	
 	/* ---------------------------------------------- ES OPERATIONS ---------------------------------------------- */
-	//Method to fetch products from elastic search
+	//Method to fetch all the products from elastic search
 	@Override
-	public List<Product> getProducts(Integer pageNumber, Integer pageSize){
-		Pageable page = PageRequest.of(pageNumber, pageSize);
-		Page<Product> productPage = this.productRepo.findAll(page);
+	public List<ProductDto> getProducts(Integer pageNumber, Integer pageSize){
+		Sort sort = Sort.by(Sort.Direction.ASC, "productId"); //Sort the result set in ascending order w.r.t id
+		Pageable page = PageRequest.of(pageNumber, pageSize, sort);
+		Page<ESProduct> productPage = this.esProductRepo.findAll(page);
+		List<ESProduct> productList = productPage.getContent();
+		List<ProductDto> dtoList = this.convertToDtoList(productList);
+		return dtoList;
+	}
+	
+	//Method to get a list of all the product with name
+	@Override
+	public List<ParentDto> getESProductsWithFilters(Integer pageNumber, Integer pageSize, String productName, String productTargetName, String productCategoryName) {
+		/*
+		if(productName.length() == 0) productName = null;
+		if(productCategoryName.length() == 0) productCategoryName = null;
+		if(productTargetName.length() == 0) productTargetName = null;
+		
+		
+		
+		List<ParentDto> resultList;
+		Sort sort = Sort.by(Sort.Direction.ASC, "productId"); //Sort the result set in ascending order w.r.t id
+		Pageable page = PageRequest.of(pageNumber, pageSize, sort);
+		Page<Product> productPage = this.productRepo.findProductsByConditions(productCategoryName, productTargetName, productName, page);
 		List<Product> productList = productPage.getContent();
-		return productList;
+		List<ProductDto> productDtoList = this.convertToDtoList(productList);
+		resultList = new ArrayList<>(productDtoList);
+		return resultList;
+		*/
+		return null;
 	}
 	
 	//Method to add a product 
@@ -109,14 +139,73 @@ public class ProductServicesImpl implements ProductServices {
 	
 	// Method to convert product-entity list to product-dto list--> For ElasticSearch operation
 	@Override
-	public List<ProductDto> convertToDtoList(List<Product> productList) {
+	public List<ProductDto> convertToDtoList(List<ESProduct> productList) {
 		List<ProductDto> dtoList = new ArrayList<>();
-		for(Product product: productList) {
-			ProductDto dto = this.mapper.map(product, ProductDto.class);
+		for(ESProduct product: productList) {
+			ProductDto dto = this.convertESProductToDto(product);
 			dtoList.add(dto);
 		}
 		return dtoList;
 	}
+	
+	//Method to delete a product entity from elastic search
+	@Override
+	@Transactional
+	public String deleteESProduct(Long productId) {
+		String dbStatus = this.deleteProduct(productId);
+		
+		if(!dbStatus.equalsIgnoreCase("success!")) {
+			//Throw and handle exception
+		}
+		Product esProduct = this.productRepo.findById(productId).orElse(null);
+		if(esProduct == null) {
+			//Product isn't in the es so no need to delete
+			return "Successfully Deleted!";
+		}
+		this.productRepo.delete(esProduct);
+		return "Successfully Deleted!";
+	}
+	
+	//Method to fetch a product from ES using productId
+	@Override
+	public ProductDto getAESProduct(Long productId) {
+		/*
+		Product esProduct = this.productRepo.findById(productId).orElse(null);
+		if(esProduct == null) {
+			return null;
+		}else {
+			ProductDto resultDto = this.convertESProductToDto(esProduct);
+			return resultDto;
+		}
+		*/
+		return null;
+	}
+	
+	//Method to convert ES document to DTO
+	@Override
+	public ProductDto convertESProductToDto(ESProduct esProduct) {
+		//Converting String date to LocalDateTime instance
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        LocalDateTime creationDateTime =  LocalDateTime.parse(esProduct.getProductCreationDateTime(), formatter);
+        LocalDateTime updationDateTime = LocalDateTime.parse(esProduct.getProductUpdationDateTime(), formatter);
+        
+        //Fetching list of available color and size for a product
+        Set<String> colorSet = new HashSet<>();
+        Set<String> sizeSet = new HashSet<>();
+        
+        List<ESProduct.Variants> esVariantList = esProduct.getVariants();
+        for(ESProduct.Variants variant : esVariantList) {
+        	colorSet.add(variant.getColorName());
+        	sizeSet.add(variant.getSizeName());
+        }
+		
+		ProductDto dto = new ProductDto(esProduct.getProductId(), esProduct.getProductName(), 
+				esProduct.getProductDescription(), esProduct.getProductImageURl(), esProduct.getProductCategoryName(),
+				esProduct.getProductTargetName(), creationDateTime, updationDateTime, 
+				new ArrayList<>(colorSet), new ArrayList<>(sizeSet));
+		return dto;
+	}
+
 	
 	//Method to convert product-dto to product-entity --> For ElasticSearch operation
 	@Override
@@ -386,11 +475,6 @@ public class ProductServicesImpl implements ProductServices {
 				}
 				List<Object[]> colorsAndSizesList = this.productDao.findUniqueColorsAndSizesForAProduct(savedProducts);
 				ProductDto resultDto = this.getProductDtoWithColorAndSize(savedProducts, colorsAndSizesList);
-				try {
-					Thread.sleep(300000);
-				}catch (InterruptedException e) {
-					// TODO: handle exception
-				}
 				cacheManager.getCache("listing").clear();
 				cacheManager.getCache("readProduct").clear();
 				return resultDto;

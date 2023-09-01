@@ -149,7 +149,6 @@ public class Controller {
 		return dtoList;
 	}
 	
-	
 
 	//Fetch a product from the database according to its id
 	@GetMapping(path = "/products/{productId}")
@@ -191,10 +190,28 @@ public class Controller {
 	/* --------------------------------------- ES Operations --------------------------------------- */
 	
 	@GetMapping(path = "/es/products")
-	public List<Product> getEsProducts(
+	public List<ParentDto> getEsProducts(
 			@RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
-			@RequestParam(value = "pageSize", defaultValue = "100", required = false) Integer pageSize){
-		return this.productServices.getProducts(pageNumber, pageSize);
+			@RequestParam(value = "pageSize", defaultValue = "100", required = false) Integer pageSize,
+			@RequestParam(value = "productName", defaultValue = "", required = false) String productName,
+			@RequestParam(value = "targetName", defaultValue = "", required = false) String productTargetName,
+			@RequestParam(value = "categoryName", defaultValue = "", required = false) String productCategoryName){
+		List<ParentDto> dtoList;
+		if(productName.isBlank()) {
+			List<ProductDto> productDtos = this.productServices.getProducts(pageNumber, pageSize);
+			dtoList = new ArrayList<>(productDtos);
+			
+		}else {
+			dtoList = this.productServices.getESProductsWithFilters(pageNumber, pageSize, productName, productTargetName, productCategoryName);
+		}
+		return dtoList;
+	}
+	
+	
+	@GetMapping(path = "/es/products/{productId}")
+	public ProductDto getEsProduct(@PathVariable Long productId) {
+		ProductDto resultDto = this.productServices.getAESProduct(productId);
+		return resultDto;
 	}
 	
 	
@@ -208,6 +225,11 @@ public class Controller {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
+	}
+	
+	@DeleteMapping(path = "/es/products/{productId}")
+	public String deleteESProduct(@PathVariable Long productId) {
+		return this.productServices.deleteESProduct(productId);
 	}
 	
 	

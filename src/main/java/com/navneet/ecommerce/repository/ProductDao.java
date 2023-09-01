@@ -64,7 +64,7 @@ public interface ProductDao extends JpaRepository<Products, Long>, JpaSpecificat
 	public void deleteByProductId(Long productId);
 	
 	//Method to find a product using its id
-	@Cacheable(value = "readProduct", key = "#productId")
+	
 	Optional<Products> findById(Long productId);
 	
 
