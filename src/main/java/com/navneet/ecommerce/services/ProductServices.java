@@ -53,6 +53,9 @@ public interface ProductServices {
 	//Method to add a product to ES
 	public String addProductES(ProductUpdateDto dto);
 
+	//Method to convert the MySQL Product Entity to ES Product Entity
+	ESProduct convertDBEntityToESProduct(Products savedDBProduct);
+	
 	//Method to convert product-entity to product-dto
 	public List<ProductDto> convertToDtoList(List<ESProduct> productList);
 	
@@ -64,6 +67,8 @@ public interface ProductServices {
 	
 	//Method to convert dto to ESProduct entity
 	public Product convertToESProduct(ProductDto dto);
+
+	
 
 	
 

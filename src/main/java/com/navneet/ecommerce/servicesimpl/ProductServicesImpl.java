@@ -37,6 +37,7 @@ import com.navneet.ecommerce.dto.ProductUpdateDto;
 import com.navneet.ecommerce.dto.Variant;
 import com.navneet.ecommerce.entities.Category;
 import com.navneet.ecommerce.entities.Color;
+import com.navneet.ecommerce.entities.ProductVariants;
 import com.navneet.ecommerce.entities.Products;
 import com.navneet.ecommerce.entities.Target;
 import com.navneet.ecommerce.esmodel.ESProduct;
@@ -124,12 +125,8 @@ public class ProductServicesImpl implements ProductServices {
 	@Transactional
 	public String addProductES(ProductUpdateDto dto) {
 		Products savedDBProduct = this.addProductDB(dto);
- 		List<Object[]> colorsAndSizesList = this.productDao.findUniqueColorsAndSizesForAProduct(savedDBProduct);
-		ProductDto productDto = this.getProductDtoWithColorAndSize(savedDBProduct, colorsAndSizesList);
-		Product esProduct = this.convertToESProduct(productDto);
-		
-		System.out.println("---------- creation date : ------------"+ esProduct.getProductCreationDateTime());
-		Product savedESProduct = this.productRepo.save(esProduct);
+		ESProduct esProduct = this.convertDBEntityToESProduct(savedDBProduct);
+		ESProduct savedESProduct = this.esProductRepo.save(esProduct);
 		
 		if(savedESProduct == null) {
 			//Throw and Handle Exception
@@ -137,6 +134,33 @@ public class ProductServicesImpl implements ProductServices {
 		return "Product Saved succesfully with id : "+ savedESProduct.getProductId();
 	}
 	
+	@Override
+	public ESProduct convertDBEntityToESProduct(Products savedDBProduct) {
+		List<ProductVariants> variantsList = this.variantsDao.findByProducts_ProductId(savedDBProduct.getProductId());
+		List<ESProduct.Variants> esVariantsList = new ArrayList<>();
+		for(ProductVariants variant : variantsList) {
+			ESProduct.Variants esVariant = new ESProduct.Variants(variant.getColor().getColorName(), variant.getProductCreationDateTime().toString(), 
+					variant.getVariantPrice().floatValue(), variant.getProductQuantity(), variant.getSize().getSizeName(),
+					variant.getSkuId(), variant.getProductUpdationDateTime().toString());
+			
+			esVariantsList.add(esVariant);
+		}
+		
+		//Creating and initializing ESProduct entity
+		ESProduct esProduct = new ESProduct(); 
+		esProduct.setProductId(savedDBProduct.getProductId());
+		esProduct.setProductCategoryName(savedDBProduct.getProductCategoryName());
+		esProduct.setProductCreationDateTime(savedDBProduct.getProductCreationTime().toString());
+		esProduct.setProductDescription(savedDBProduct.getProductDescription());
+		esProduct.setProductImageURl(savedDBProduct.getImageUrl());
+		esProduct.setProductName(savedDBProduct.getProductName());
+		esProduct.setProductTargetName(savedDBProduct.getProductTargetName());
+		esProduct.setProductUpdationDateTime(savedDBProduct.getProductUpdationTime().toString());
+		esProduct.setVariants(esVariantsList);
+		
+		return esProduct;
+	}
+
 	// Method to convert product-entity list to product-dto list--> For ElasticSearch operation
 	@Override
 	public List<ProductDto> convertToDtoList(List<ESProduct> productList) {
@@ -169,25 +193,24 @@ public class ProductServicesImpl implements ProductServices {
 	//Method to fetch a product from ES using productId
 	@Override
 	public ProductDto getAESProduct(Long productId) {
-		/*
-		Product esProduct = this.productRepo.findById(productId).orElse(null);
+		
+		ESProduct esProduct = this.esProductRepo.findById(productId).orElse(null);
 		if(esProduct == null) {
 			return null;
 		}else {
 			ProductDto resultDto = this.convertESProductToDto(esProduct);
 			return resultDto;
 		}
-		*/
-		return null;
 	}
 	
 	//Method to convert ES document to DTO
 	@Override
 	public ProductDto convertESProductToDto(ESProduct esProduct) {
+		
 		//Converting String date to LocalDateTime instance
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        LocalDateTime creationDateTime =  LocalDateTime.parse(esProduct.getProductCreationDateTime(), formatter);
-        LocalDateTime updationDateTime = LocalDateTime.parse(esProduct.getProductUpdationDateTime(), formatter);
+        LocalDateTime creationDateTime =  LocalDateTime.parse(esProduct.getProductCreationDateTime().substring(0, 19), formatter);
+        LocalDateTime updationDateTime = LocalDateTime.parse(esProduct.getProductUpdationDateTime().subSequence(0, 19), formatter);
         
         //Fetching list of available color and size for a product
         Set<String> colorSet = new HashSet<>();
