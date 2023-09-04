@@ -36,8 +36,11 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
-@Component
-public class ElasticSynchronizer implements CommandLineRunner{
+/*This class is used to import data from MySql to elastic-search, 
+  if importing for the first time use CommandLineRunner interface to 
+  run at application startup time */
+
+public class ElasticSynchronizer{
 
 	@Autowired
 	private ProductDao productDao;
@@ -111,10 +114,10 @@ public class ElasticSynchronizer implements CommandLineRunner{
 	*/
 	
 	
-	@Override
+	//Use @Override annotation here
 	public void run(String... args) throws Exception {
 		int batchSize = 1000;
-		int pageNumber = 328;
+		int pageNumber = 806;
 		boolean continueProcessing = true;
 		LOG.info("Starting to import data for the first time!");
 		do {
