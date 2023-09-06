@@ -181,12 +181,12 @@ public class ProductServicesImpl implements ProductServices {
 		if(!dbStatus.equalsIgnoreCase("success!")) {
 			//Throw and handle exception
 		}
-		Product esProduct = this.productRepo.findById(productId).orElse(null);
+		ESProduct esProduct = this.esProductRepo.findById(productId).orElse(null);
 		if(esProduct == null) {
 			//Product isn't in the es so no need to delete
 			return "Successfully Deleted!";
 		}
-		this.productRepo.delete(esProduct);
+		this.esProductRepo.delete(esProduct);
 		return "Successfully Deleted!";
 	}
 	
